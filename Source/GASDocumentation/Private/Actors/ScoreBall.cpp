@@ -1,58 +1,89 @@
-// Copyright 2023 Dan Kestranek.
-
+// ScoreBall.cpp
 #include "Actors/ScoreBall.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/SphereComponent.h"
 #include "Characters/Heroes/GDArenaCharacter.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Actors/GoalArea.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameModeBase.h"
 
-// Sets default values
 AScoreBall::AScoreBall()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
+
+    CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+    RootComponent = CollisionComponent;
+    CollisionComponent->SetSphereRadius(20.0f);
+    CollisionComponent->SetCollisionProfileName("BlockAllDynamic");
+    CollisionComponent->SetNotifyRigidBodyCollision(true); // ✅ Required to trigger OnHit
+    CollisionComponent->SetSimulatePhysics(false);         // Optional, if using ProjectileMovement
+   
+    CollisionComponent->OnComponentHit.AddDynamic(this, &AScoreBall::OnBallHit);
+
+    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+    ProjectileMovement->InitialSpeed = 1000.0f;
+    ProjectileMovement->MaxSpeed = 1000.0f;
+    ProjectileMovement->bShouldBounce = true;
 
     bIsHeld = false;
     BallCarrier = nullptr;
 }
 
-// Called when the game starts or when spawned
 void AScoreBall::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
 }
 
-// Called every frame
 void AScoreBall::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
+    Super::Tick(DeltaTime);
 }
 
-void AScoreBall::AttachToCharacter(AGDArenaCharacter* Character, FName SocketName)
+void AScoreBall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+                           UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (!Character) return;
+    if (bIsHeld || !OtherActor || OtherActor == this) return;
 
-    BallCarrier = Character;
+    if (AGDArenaCharacter* Character = Cast<AGDArenaCharacter>(OtherActor))
+    {
+        HandleCatch(Character);
+    }
+    else if (OtherActor->IsA(AGoalArea::StaticClass()))
+    {
+        HandleScore(OtherActor);
+    }
+}
+
+void AScoreBall::HandleCatch(AGDArenaCharacter* Catcher)
+{
+    if (!Catcher) return;
+
+    BallCarrier = Catcher;
     bIsHeld = true;
 
-    // Attach to the character's socket
-    AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
-
-    // Disable physics and collisions
+    ProjectileMovement->StopMovementImmediately();
     SetActorEnableCollision(false);
-    SetActorTickEnabled(false);
+
+    // Apply gameplay tag or notify GAS system (to be implemented)
+    // Example: Catcher->GetAbilitySystemComponent()->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("State.CarryingBall"));
 }
 
-void AScoreBall::DetachFromCharacter()
+void AScoreBall::HandleScore(AActor* Goal)
 {
+    if (BallCarrier)
+    {
+        // Notify GameMode or ScoringSystem
+        if (AGameModeBase* GM = UGameplayStatics::GetGameMode(this))
+        {
+            // Cast to custom GameMode and call scoring logic
+            // Example: Cast<ACustomGameMode>(GM)->ScoreGoal(BallCarrier);
+        }
+    }
+
+    // Reset state
     BallCarrier = nullptr;
     bIsHeld = false;
-
-    // Detach from the character
-    DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-
-    // Re-enable physics and collisions
     SetActorEnableCollision(true);
-    SetActorTickEnabled(true);
+    ProjectileMovement->StopMovementImmediately();
+    // Optionally destroy or respawn ball
 }
-

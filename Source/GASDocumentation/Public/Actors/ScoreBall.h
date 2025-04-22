@@ -1,10 +1,14 @@
-// Copyright 2023 Dan Kestranek.
-
+// ScoreBall.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ScoreBall.generated.h"
+
+class USphereComponent;
+class UProjectileMovementComponent;
+class AGDArenaCharacter;
+class AGoalArea;
 
 UCLASS()
 class GASDOCUMENTATION_API AScoreBall : public AActor
@@ -14,14 +18,26 @@ class GASDOCUMENTATION_API AScoreBall : public AActor
 public:
     AScoreBall();
 
-    void BeginPlay();
-    void Tick(float DeltaTime) override;
+    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
+
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "ScoreBall")
     bool bIsHeld;
 
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "ScoreBall")
-    class AGDArenaCharacter* BallCarrier;
+    AGDArenaCharacter* BallCarrier;
 
-    void AttachToCharacter(AGDArenaCharacter* Character, FName SocketName);
-    void DetachFromCharacter();
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ScoreBall")
+    USphereComponent* CollisionComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ScoreBall")
+    UProjectileMovementComponent* ProjectileMovement;
+
+    UFUNCTION()
+    void OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+                   UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+private:
+    void HandleCatch(AGDArenaCharacter* Catcher);
+    void HandleScore(AActor* Goal);
 };
