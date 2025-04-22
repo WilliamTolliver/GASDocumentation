@@ -321,3 +321,13 @@ void AGDHeroCharacter::BindASCInput()
 		ASCInputBound = true;
 	}
 }
+
+void AGDHeroCharacter::SetHeldBall(AScoreBall* NewBall)
+{
+    HeldBall = NewBall;
+}
+
+AScoreBall* AGDHeroCharacter::GetHeldBall() const
+{
+    return HeldBall;
+}

@@ -39,6 +39,9 @@ public:
 
 	virtual void FinishDying() override;
 
+	void SetHeldBall(AScoreBall* NewBall);
+	AScoreBall* GetHeldBall() const;
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GASDocumentation|Camera")
 	float BaseTurnRate = 45.0f;
@@ -69,6 +72,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GASDocumentation|UI")
 	class UWidgetComponent* UIFloatingStatusBarComponent;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "GASDocumentation|Ball")
+	FName BallSocketName = "BallSocket";
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GASDocumentation|Ball")
+	class AScoreBall* HeldBall;
 
 	bool ASCInputBound = false;
 
