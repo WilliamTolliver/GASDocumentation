@@ -1,3 +1,5 @@
+// Copyright 2023 Dan Kestranek.
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,12 +14,14 @@ class GASDOCUMENTATION_API AScoreBall : public AActor
 public:
     AScoreBall();
 
+    void BeginPlay();
+    void Tick(float DeltaTime) override;
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "ScoreBall")
     bool bIsHeld;
 
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "ScoreBall")
-    class AGDHeroCharacter* BallCarrier;
+    class AGDArenaCharacter* BallCarrier;
 
-    void AttachToCharacter(AGDHeroCharacter* Character, FName SocketName);
+    void AttachToCharacter(AGDArenaCharacter* Character, FName SocketName);
     void DetachFromCharacter();
 };
