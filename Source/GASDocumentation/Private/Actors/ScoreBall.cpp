@@ -13,13 +13,20 @@ AScoreBall::AScoreBall()
 
     CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
     RootComponent = CollisionComponent;
-    CollisionComponent->SetSphereRadius(20.0f);
-    CollisionComponent->SetCollisionProfileName("BlockAllDynamic");
-    CollisionComponent->SetNotifyRigidBodyCollision(true); // ✅ Required to trigger OnHit
-    CollisionComponent->SetSimulatePhysics(false);         // Optional, if using ProjectileMovement
+    CollisionComponent->SetSphereRadius(140.0f);
+    
+    // Change collision settings to allow overlaps
+    CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    CollisionComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+    CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+    CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+    
+    CollisionComponent->SetNotifyRigidBodyCollision(true); // For hit events
+    CollisionComponent->SetGenerateOverlapEvents(true);    // Enable overlap events
+    CollisionComponent->SetSimulatePhysics(false);
    
     CollisionComponent->OnComponentHit.AddDynamic(this, &AScoreBall::OnBallHit);
-
+    CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AScoreBall::OnBallOverlap);
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
     ProjectileMovement->InitialSpeed = 1000.0f;
     ProjectileMovement->MaxSpeed = 1000.0f;
@@ -42,6 +49,8 @@ void AScoreBall::Tick(float DeltaTime)
 void AScoreBall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                            UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+
+    UE_LOG(LogTemp, Warning, TEXT("Ball Hit: %s"), *OtherActor->GetName());
     if (bIsHeld || !OtherActor || OtherActor == this) return;
 
     if (AGDArenaCharacter* Character = Cast<AGDArenaCharacter>(OtherActor))
@@ -51,6 +60,23 @@ void AScoreBall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
     else if (OtherActor->IsA(AGoalArea::StaticClass()))
     {
         HandleScore(OtherActor);
+    }
+}
+
+void AScoreBall::OnBallOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+    UE_LOG(LogTemp, Warning, TEXT("Ball Overlapping: %s"), *OtherActor->GetName());
+    if (bIsHeld || !OtherActor || OtherActor == this) return;
+
+    if (AGDArenaCharacter* Character = Cast<AGDArenaCharacter>(OtherActor))
+    {
+    HandleCatch(Character);
+    }
+    else if (OtherActor->IsA(AGoalArea::StaticClass()))
+    {
+    HandleScore(OtherActor);
     }
 }
 
