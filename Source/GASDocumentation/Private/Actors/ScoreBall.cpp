@@ -2,7 +2,7 @@
 #include "Actors/ScoreBall.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
-#include "Characters/Heroes/GDArenaCharacter.h"
+#include "Characters/Heroes/GDHeroCharacter.h"
 #include "Actors/GoalArea.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameModeBase.h"
@@ -19,7 +19,7 @@ AScoreBall::AScoreBall()
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     CollisionComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
     CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-    CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+    //CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
     
     CollisionComponent->SetNotifyRigidBodyCollision(true); // For hit events
     CollisionComponent->SetGenerateOverlapEvents(true);    // Enable overlap events
@@ -53,12 +53,14 @@ void AScoreBall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
     UE_LOG(LogTemp, Warning, TEXT("Ball Hit: %s"), *OtherActor->GetName());
     if (bIsHeld || !OtherActor || OtherActor == this) return;
 
-    if (AGDArenaCharacter* Character = Cast<AGDArenaCharacter>(OtherActor))
+    if (AGDHeroCharacter* Character = Cast<AGDHeroCharacter>(OtherActor))
     {
+        UE_LOG(LogTemp, Warning, TEXT("Handling catch for: %s"), *OtherActor->GetName());
         HandleCatch(Character);
     }
     else if (OtherActor->IsA(AGoalArea::StaticClass()))
     {
+        UE_LOG(LogTemp, Warning, TEXT("Handling score! for: %s"), *OtherActor->GetName());
         HandleScore(OtherActor);
     }
 }
@@ -70,17 +72,19 @@ void AScoreBall::OnBallOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
     UE_LOG(LogTemp, Warning, TEXT("Ball Overlapping: %s"), *OtherActor->GetName());
     if (bIsHeld || !OtherActor || OtherActor == this) return;
 
-    if (AGDArenaCharacter* Character = Cast<AGDArenaCharacter>(OtherActor))
+    if (AGDHeroCharacter* Character = Cast<AGDHeroCharacter>(OtherActor))
     {
-    HandleCatch(Character);
+        UE_LOG(LogTemp, Warning, TEXT("Handling catch for: %s"), *OtherActor->GetName());
+        HandleCatch(Character);
     }
     else if (OtherActor->IsA(AGoalArea::StaticClass()))
     {
-    HandleScore(OtherActor);
+        UE_LOG(LogTemp, Warning, TEXT("Handling score! for: %s"), *OtherActor->GetName());
+        HandleScore(OtherActor);
     }
 }
 
-void AScoreBall::HandleCatch(AGDArenaCharacter* Catcher)
+void AScoreBall::HandleCatch(AGDHeroCharacter* Catcher)
 {
     if (!Catcher) return;
 

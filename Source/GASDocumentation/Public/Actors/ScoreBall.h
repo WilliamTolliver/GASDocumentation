@@ -7,7 +7,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
-class AGDArenaCharacter;
+class AGDHeroCharacter;
 class AGoalArea;
 
 UCLASS()
@@ -25,7 +25,7 @@ public:
     bool bIsHeld;
 
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "ScoreBall")
-    AGDArenaCharacter* BallCarrier;
+    AGDHeroCharacter* BallCarrier;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ScoreBall")
     USphereComponent* CollisionComponent;
@@ -42,6 +42,6 @@ public:
         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 private:
-    void HandleCatch(AGDArenaCharacter* Catcher);
+    void HandleCatch(AGDHeroCharacter* Catcher);
     void HandleScore(AActor* Goal);
 };
