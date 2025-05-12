@@ -7,6 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "Characters/Abilities/GDAbilitySystemComponent.h"
 #include "Characters/Abilities/AttributeSets/GDAttributeSetBase.h"
+#include "Combat/CombatComponent.h" // Add this include
 #include "UnitBase.generated.h"
 
 UCLASS()
@@ -20,15 +21,7 @@ public:
     // Implement IAbilitySystemInterface
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-    // Turn Management
-    UFUNCTION(BlueprintCallable, Category = "Unit|Turn Management")
-    virtual void StartTurn();
-
-    UFUNCTION(BlueprintCallable, Category = "Unit|Turn Management")
-    virtual void EndTurn();
-
-    UFUNCTION(BlueprintCallable, Category = "Unit|Turn Management")
-    virtual bool RequestTurn();
+    virtual UCombatComponent* GetCombatComponent() const;
 
     // Getters for attributes
     UFUNCTION(BlueprintCallable, Category = "Unit|Attributes")
@@ -43,9 +36,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Unit|Attributes")
     float GetMaxMana() const;
 
-protected:
+    // Move CombatComponent to public
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+    UCombatComponent* CombatComponent;
+
+    // Add BeginPlay declaration
     virtual void BeginPlay() override;
 
+protected:
     // Ability System Component
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities")
     UGDAbilitySystemComponent* AbilitySystemComponent;
@@ -54,16 +52,11 @@ protected:
     UPROPERTY()
     UGDAttributeSetBase* AttributeSet;
 
-    // Turn Management
-    UPROPERTY(BlueprintReadOnly, Category = "Unit|Turn Management")
-    bool bIsMyTurn;
-
     // Initialize abilities and attributes
     virtual void InitializeAttributes();
     virtual void GiveAbilities();
 
 private:
-    // Helper function to bind to attribute changes
     virtual void BindAttributeChangeDelegates();
     
 public:    

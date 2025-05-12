@@ -22,10 +22,13 @@ AUnitBase::AUnitBase()
     AbilitySystemComponent->SetIsReplicated(true);
     AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 
+    //Create and initialize the Combat Component
+    CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+    CombatComponent->SetIsReplicated(true);
+
     // Create the Attribute Set
     AttributeSet = CreateDefaultSubobject<UGDAttributeSetBase>(TEXT("AttributeSet"));
 
-    bIsMyTurn = false;
 }
 
 // Called when the game starts or when spawned
@@ -58,6 +61,11 @@ UAbilitySystemComponent* AUnitBase::GetAbilitySystemComponent() const
     return AbilitySystemComponent;
 }
 
+UCombatComponent* AUnitBase::GetCombatComponent() const
+{
+    return CombatComponent;
+}
+
 void AUnitBase::InitializeAttributes()
 {
     if (!AbilitySystemComponent)
@@ -82,35 +90,6 @@ void AUnitBase::BindAttributeChangeDelegates()
         return;
 
     // Bind to attribute changes here if needed
-}
-
-void AUnitBase::StartTurn()
-{
-    bIsMyTurn = true;
-    // Implement turn start logic here
-}
-
-void AUnitBase::EndTurn()
-{
-    bIsMyTurn = false;
-    // Implement turn end logic here
-}
-
-bool AUnitBase::RequestTurn()
-{
-    // Implement turn request logic here
-	// Make the request to the GameMode
-	if (GetWorld())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Requesting turn for unit: %s"), *GetName());
-		AJRPGGameModeBase* GameMode = Cast<AJRPGGameModeBase>(GetWorld()->GetAuthGameMode());
-		if (GameMode)
-		{
-			GameMode->RequestTurn(this);
-			return true;
-		}
-	}
-    return false;
 }
 
 float AUnitBase::GetHealth() const

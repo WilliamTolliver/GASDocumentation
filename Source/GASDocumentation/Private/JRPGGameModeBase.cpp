@@ -9,7 +9,7 @@ AJRPGGameModeBase::AJRPGGameModeBase()
 }
 
 // For BlueprintNativeEvent functions, we implement the _Implementation version
-void AJRPGGameModeBase::RequestTurn_Implementation(AUnitBase* Unit)
+void AJRPGGameModeBase::RequestTurn(AUnitBase* Unit)
 {
     // Default C++ implementation - can be empty if you want all logic in Blueprint
     // This will run if no Blueprint override is provided
@@ -19,23 +19,39 @@ void AJRPGGameModeBase::RequestTurn_Implementation(AUnitBase* Unit)
     TurnOrder.Add(Unit);
     // Notify Blueprint that a turn has been requested
     OnTurnRequested.Broadcast(Unit);
+
+    AJRPGGameModeBase::StartTurn(Unit);
 }
 
-void AJRPGGameModeBase::StartTurn_Implementation(AUnitBase* Unit)
+void AJRPGGameModeBase::StartTurn(AUnitBase* Unit)
+{
+    if (!Unit) return;
+
+    UE_LOG(LogTemp, Warning, TEXT("Attempting to grant turn for unit: %s"), *Unit->GetName());
+    
+    if (TurnOrder.Num() > 0)
+    {
+        AUnitBase* NextUnit = TurnOrder[0];
+        if (NextUnit && NextUnit->CombatComponent)
+        {
+            NextUnit->CombatComponent->StartTurn();
+        }
+    }
+}
+
+void AJRPGGameModeBase::EndTurn(AUnitBase* Unit)
+{
+    if (!Unit || !Unit->CombatComponent) return;
+
+    UE_LOG(LogTemp, Warning, TEXT("Turn ended for unit: %s"), *Unit->GetName());
+    Unit->CombatComponent->EndTurn();
+}
+
+void AJRPGGameModeBase::BeginBattle()
 {
     // Default C++ implementation - can be empty if you want all logic in Blueprint
     // This will run if no Blueprint override is provided
 
-    UE_LOG(LogTemp, Warning, TEXT("Turn started for unit: %s"), *Unit->GetName());
-    // Start Turn for next unit in the turn order
-    if (TurnOrder.Num() > 0)
-    {
-        AUnitBase* NextUnit = TurnOrder[0];
-        TurnOrder.RemoveAt(0); // Remove the unit from the turn order
-        NextUnit->StartTurn(); // Call StartTurn on the next unit
-    }
+    UE_LOG(LogTemp, Warning, TEXT("Battle started!"));
+    // Start the battle logic here
 }
-
-
-
-

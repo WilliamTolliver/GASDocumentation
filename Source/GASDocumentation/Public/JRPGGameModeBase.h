@@ -23,12 +23,18 @@ public:
 
 	// Custom Events
 	// Turn request - annotate these to be implemented in blueprints
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game Mode|Turn Management")
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|Turn Management")
 	void RequestTurn(AUnitBase* Unit);
 
 	// Turn start - annotate these to be implemented in blueprints
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game Mode|Turn Management")
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|Turn Management")
 	void StartTurn(AUnitBase* Unit);
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|Turn Management")
+	void EndTurn(AUnitBase* Unit);
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|Turn Management")
+	void BeginBattle();
 
 	// Custom Properties - 
 	UPROPERTY(BlueprintReadOnly, Category = "Game Mode|Turn Management")
