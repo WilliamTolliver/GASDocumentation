@@ -36,9 +36,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Game Mode|Turn Management")
 	void BeginBattle();
 
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|Turn Management")
+	void GetAllCombatants();
+
 	// Custom Properties - 
 	UPROPERTY(BlueprintReadOnly, Category = "Game Mode|Turn Management")
 	TArray<AUnitBase*> TurnOrder;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Game Mode|Turn Management")
+	TArray<AUnitBase*> Combatants;
 
 	// The delegate that will be exposed to Blueprint
     UPROPERTY(BlueprintAssignable, Category = "Turn System")

@@ -32,10 +32,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat|Turn Management")
 	void BeginBattle();
 
+	
+	// Event Begin Battle, that will start this units battle timer. This will be overridden in blueprints
+	UFUNCTION(BlueprintNativeEvent, Category = "Combat|Turn Management")
+	void EventBeginBattle();
+
     UPROPERTY(BlueprintReadOnly, Category = "Combat")
     bool bIsMyTurn;
-	
+
+    // Timer handle for turn requests
+	UPROPERTY(BlueprintReadOnly, Category = "Combat|Turn Management")
+    FTimerHandle TurnRequestTimer;
+
 protected:
+    UFUNCTION(BlueprintCallable, Category = "Combat|Turn Management")
+    void HandleTurnRequest();
 
     UPROPERTY()
     AUnitBase* OwningUnit;

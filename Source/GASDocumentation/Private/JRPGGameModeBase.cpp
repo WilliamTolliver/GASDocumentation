@@ -2,6 +2,8 @@
 
 #include "JRPGGameModeBase.h"
 #include "Unit/UnitBase.h"
+#include "Kismet/GameplayStatics.h"
+
 
 AJRPGGameModeBase::AJRPGGameModeBase()
 {
@@ -51,7 +53,35 @@ void AJRPGGameModeBase::BeginBattle()
 {
     // Default C++ implementation - can be empty if you want all logic in Blueprint
     // This will run if no Blueprint override is provided
+    GetAllCombatants();
 
     UE_LOG(LogTemp, Warning, TEXT("Battle started!"));
     // Start the battle logic here
+
+    // Tell all units with a CombatComponent to begin battle
+    for (AUnitBase* Unit : Combatants)
+    {
+        if (Unit && Unit->CombatComponent)
+        {
+            Unit->CombatComponent->BeginBattle();
+        }
+    }
+}
+
+// This function is called to get all combatants in the game
+void AJRPGGameModeBase::GetAllCombatants()
+{
+    // This function should be implemented to populate the Combatants array
+    // For example, you might want to find all units in the level and add them to the array
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUnitBase::StaticClass(), FoundActors);
+
+    for (AActor* Actor : FoundActors)
+    {
+        AUnitBase* Unit = Cast<AUnitBase>(Actor);
+        if (Unit)
+        {
+            Combatants.Add(Unit);
+        }
+    }
 }
