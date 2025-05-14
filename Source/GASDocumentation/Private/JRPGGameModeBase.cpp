@@ -51,6 +51,13 @@ void AJRPGGameModeBase::EndTurn(AUnitBase* Unit)
 
 void AJRPGGameModeBase::BeginBattle()
 {
+    // Load positions if not already loaded
+    if (BattlePositionData)
+    {
+        LoadBattlePositions(BattlePositionData);
+        AssignBattlePositions();
+    }
+
     // Default C++ implementation - can be empty if you want all logic in Blueprint
     // This will run if no Blueprint override is provided
     GetAllCombatants();
@@ -82,6 +89,36 @@ void AJRPGGameModeBase::GetAllCombatants()
         if (Unit)
         {
             Combatants.Add(Unit);
+        }
+    }
+}
+
+void AJRPGGameModeBase::LoadBattlePositions(UBattlePositionData* NewBattleData)
+{
+    if (!NewBattleData) return;
+
+    BattlePositionData = NewBattleData;
+    CurrentPlayerPositions = BattlePositionData->PlayerPartyPositions;
+    CurrentEnemyPositions = BattlePositionData->EnemyPartyPositions;
+}
+
+void AJRPGGameModeBase::AssignBattlePositions()
+{
+    // Assign player party positions
+    for (int32 i = 0; i < PlayerParty.Num() && i < CurrentPlayerPositions.Num(); ++i)
+    {
+        if (PlayerParty[i])
+        {
+            PlayerParty[i]->SetActorTransform(CurrentPlayerPositions[i]);
+        }
+    }
+
+    // Assign enemy party positions
+    for (int32 i = 0; i < EnemyParty.Num() && i < CurrentEnemyPositions.Num(); ++i)
+    {
+        if (EnemyParty[i])
+        {
+            EnemyParty[i]->SetActorTransform(CurrentEnemyPositions[i]);
         }
     }
 }

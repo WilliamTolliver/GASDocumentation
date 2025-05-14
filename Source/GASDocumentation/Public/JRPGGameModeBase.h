@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Data/BattlePositionData.h"
 #include "JRPGGameModeBase.generated.h"
 
 /**
@@ -49,5 +50,30 @@ public:
 	// The delegate that will be exposed to Blueprint
     UPROPERTY(BlueprintAssignable, Category = "Turn System")
     FOnTurnRequestedDelegate OnTurnRequested;
-	
+
+    // Battle position data asset
+    UPROPERTY(EditDefaultsOnly, Category = "Battle|Setup")
+    UBattlePositionData* BattlePositionData;
+
+    // Arrays to track parties
+    UPROPERTY(BlueprintReadOnly, Category = "Battle|Parties")
+    TArray<AUnitBase*> PlayerParty;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Battle|Parties")
+    TArray<AUnitBase*> EnemyParty;
+
+    // Arrays to store current battle positions
+    UPROPERTY(BlueprintReadOnly, Category = "Battle|Positions")
+    TArray<FTransform> CurrentPlayerPositions;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Battle|Positions")
+    TArray<FTransform> CurrentEnemyPositions;
+
+    // Function to load and setup battle positions
+    UFUNCTION(BlueprintCallable, Category = "Battle|Setup")
+    void LoadBattlePositions(UBattlePositionData* NewBattleData);
+
+protected:
+    // Function to assign positions to units
+    virtual void AssignBattlePositions();
 };
