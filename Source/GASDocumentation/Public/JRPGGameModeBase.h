@@ -73,7 +73,22 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Battle|Setup")
     void LoadBattlePositions(UBattlePositionData* NewBattleData);
 
+    // Arrays to store unit classes to spawn
+    UPROPERTY(EditDefaultsOnly, Category = "Battle|Setup")
+    TArray<TSubclassOf<AUnitBase>> PlayerPartyClasses;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Battle|Setup")
+    TArray<TSubclassOf<AUnitBase>> EnemyPartyClasses;
+
+    // Function to spawn combatants
+    UFUNCTION(BlueprintCallable, Category = "Battle|Setup")
+    void SpawnCombatants();
+
 protected:
     // Function to assign positions to units
     virtual void AssignBattlePositions();
+
+    // Helper functions for spawning
+    void SpawnPlayerParty();
+    void SpawnEnemyParty();
 };

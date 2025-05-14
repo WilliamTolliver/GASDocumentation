@@ -55,7 +55,8 @@ void AJRPGGameModeBase::BeginBattle()
     if (BattlePositionData)
     {
         LoadBattlePositions(BattlePositionData);
-        AssignBattlePositions();
+        SpawnCombatants();
+        //AssignBattlePositions();
     }
 
     // Default C++ implementation - can be empty if you want all logic in Blueprint
@@ -119,6 +120,82 @@ void AJRPGGameModeBase::AssignBattlePositions()
         if (EnemyParty[i])
         {
             EnemyParty[i]->SetActorTransform(CurrentEnemyPositions[i]);
+        }
+    }
+}
+
+void AJRPGGameModeBase::SpawnCombatants()
+{
+    // Clear existing parties
+    PlayerParty.Empty();
+    EnemyParty.Empty();
+
+    // Spawn both parties
+    SpawnPlayerParty();
+    SpawnEnemyParty();
+
+    // After spawning, assign positions
+    AssignBattlePositions();
+}
+
+void AJRPGGameModeBase::SpawnPlayerParty()
+{
+    if (CurrentPlayerPositions.Num() == 0 || PlayerPartyClasses.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No player positions or classes set for spawning"));
+        return;
+    }
+
+    for (int32 i = 0; i < PlayerPartyClasses.Num() && i < CurrentPlayerPositions.Num(); ++i)
+    {
+        if (PlayerPartyClasses[i])
+        {
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+            AUnitBase* SpawnedUnit = GetWorld()->SpawnActor<AUnitBase>(
+                PlayerPartyClasses[i],
+                CurrentPlayerPositions[i].GetLocation(),
+                CurrentPlayerPositions[i].GetRotation().Rotator(),
+                SpawnParams
+            );
+
+            if (SpawnedUnit)
+            {
+                PlayerParty.Add(SpawnedUnit);
+                UE_LOG(LogTemp, Log, TEXT("Spawned player unit: %s"), *SpawnedUnit->GetName());
+            }
+        }
+    }
+}
+
+void AJRPGGameModeBase::SpawnEnemyParty()
+{
+    if (CurrentEnemyPositions.Num() == 0 || EnemyPartyClasses.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No enemy positions or classes set for spawning"));
+        return;
+    }
+
+    for (int32 i = 0; i < EnemyPartyClasses.Num() && i < CurrentEnemyPositions.Num(); ++i)
+    {
+        if (EnemyPartyClasses[i])
+        {
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+            AUnitBase* SpawnedUnit = GetWorld()->SpawnActor<AUnitBase>(
+                EnemyPartyClasses[i],
+                CurrentEnemyPositions[i].GetLocation(),
+                CurrentEnemyPositions[i].GetRotation().Rotator(),
+                SpawnParams
+            );
+
+            if (SpawnedUnit)
+            {
+                EnemyParty.Add(SpawnedUnit);
+                UE_LOG(LogTemp, Log, TEXT("Spawned enemy unit: %s"), *SpawnedUnit->GetName());
+            }
         }
     }
 }
